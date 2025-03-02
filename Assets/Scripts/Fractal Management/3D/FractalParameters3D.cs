@@ -44,6 +44,18 @@ namespace Fractals
             }
         }
 
+        bool _background;
+
+        public bool Background
+        {
+            set
+            {
+                _background = value;
+                ComputeShader.SetBool("Background", _background);
+                AreChangesOnParameters = true;
+            }
+        }
+
         protected override void InitParameters()
         {
             ComputeShader.SetVector("LightDir", MainLight.transform.forward);

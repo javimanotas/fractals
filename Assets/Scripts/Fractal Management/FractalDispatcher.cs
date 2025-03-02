@@ -19,7 +19,7 @@ namespace Fractals
             {
                 RenderTexture.active = _renderTex;
 
-                var texture = new Texture2D(_renderTex.width, _renderTex.height, TextureFormat.RGB24, false);
+                var texture = new Texture2D(_renderTex.width, _renderTex.height, TextureFormat.ARGB32, false);
                 texture.ReadPixels(new Rect(0, 0, _renderTex.width, _renderTex.height), 0, 0);
                 texture.Apply();
 

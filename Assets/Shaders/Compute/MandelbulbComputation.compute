@@ -8,6 +8,7 @@ to make it cleaner */
 #define PIXEL_DETAIL 5
 
 RWTexture2D<float4> FractalTex;
+bool Background;
 float3 CamPos;
 float3 Forward;
 float3 LightDir;
@@ -270,5 +271,5 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     col = saturation(col, Saturation);
     col = vignette(col, OuterVignette, InnerVignette, screenUV);
     
-    FractalTex[id.xy] = float4(col.xyz, 1);
+    FractalTex[id.xy] = float4(col.xyz, Background || info.x > 0 ? 1 : 0);
 }

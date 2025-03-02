@@ -62,10 +62,7 @@ Shader "Unlit/UIColoring"
                 fixed4 col = tex2D(_MainTex, i.uv);
                 float a = col.a;
 
-                // Transition between the 2 colors using the brightness of the color
-                col = lerp(_DarkColor, _LightColor, (col.r + col.g + col.b) / 3);
-                
-                // Sets back the original alpha of the texture
+                col = lerp(_DarkColor, _LightColor, (col.r + col.g + col.b) / 3);                
                 col.a = a;
 
                 UNITY_APPLY_FOG(i.fogCoord, col);
