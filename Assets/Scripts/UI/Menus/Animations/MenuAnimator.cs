@@ -66,7 +66,7 @@ namespace Fractals.UI
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Tab))
+            if (Input.GetKeyDown(KeyCode.Escape) && !Focus.AnyFocused && !Focus.Animating)
             {
                 Toggle();
             }

@@ -9,16 +9,23 @@ namespace Fractals.UI
     {
         MenuAnimator _animator;
 
-        static bool Animating = false;
+        public static bool Animating { get; private set; } = false;
 
         PanelAnimation _parent;
 
-        public async void ToggleFocus()
+        bool _focused = false;
+
+        public static bool AnyFocused { get; private set; } = false;
+
+        async void ToggleFocus()
         {
             if (Animating)
             {
                 return;
             }
+
+            _focused = !_focused;
+            AnyFocused = _focused;
 
             Animating = true;
 
@@ -40,6 +47,14 @@ namespace Fractals.UI
             await Task.WhenAll(tasks);
 
             Animating = false;
+        }
+
+        public void Update()
+        {
+            if (_focused && Input.GetKeyDown(KeyCode.Escape))
+            {
+                ToggleFocus();
+            }
         }
     }
 }
