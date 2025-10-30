@@ -6,6 +6,7 @@ namespace Fractals
     [RequireComponent(typeof(Camera))]
     public class FirstPersonCamera : MonoBehaviour
     {
+        // Camera should be moving slower the greater you are zooming
         [SerializeField] FractalDispatcher3D Dispatcher;
 
         const float _SPEED = 3.75f;

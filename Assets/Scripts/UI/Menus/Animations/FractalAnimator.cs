@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace Fractals.UI
 {
+    /// <summary> Animates the rotation of the 3D fractals </summary>
     public class FractalAnimator : MonoBehaviour
     {
         [SerializeField] FractalDispatcher3D Dispatcher;

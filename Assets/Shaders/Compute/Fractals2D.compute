@@ -94,13 +94,17 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uint height;
     FractalTex.GetDimensions(width, height);
     
+    // Each frame in [1, 2, ..., FramestoRender] some pixels will be rendered
+    // A random function is used to avoid seeing weird patterns while processing the image
     int chunk = PseudorandomUint(id.xy) % FramesToRender;
     
+    // Keep pixels rendered in previous chunks as they are
     if (chunk > ChunkToRender)
     {
         return;
     }
     
+    // Color pixels that will be rendered black
     if (chunk < ChunkToRender)
     {
         FractalTex[id.xy] = float4(0, 0, 0, 1);

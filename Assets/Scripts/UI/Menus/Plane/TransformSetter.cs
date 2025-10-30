@@ -9,6 +9,7 @@ namespace Fractals.UI
         X, Y, Zoom
     }
 
+    /// <summary> Allows to modify the zoom and offset for 2D fractals via UI </summary>
     public class TransformSetter : ClampledFloatInputField
     {
         [SerializeField] Property Property;

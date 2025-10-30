@@ -12,6 +12,7 @@ float3 CamPos;
 float3 Forward;
 float3 LightDir;
 float Time;
+
 bool Julia;
 float JuliaRe;
 float JuliaIm;
@@ -51,8 +52,6 @@ uint PseudorandomUint(uint2 seed)
     return hash;
 }
 
-/* returns a tuple consisting on the distance of the given point to the center
-of coordinates and aditional data of the calculations to improve coloring */
 float2 mandelbulbInfo(float3 z0)
 {
     if (!Julia)
@@ -245,6 +244,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     width *= Scale;
     height *= Scale;
 
+    // Uses the same logic as 2D fractals. Read the comments there.
     int chunk = PseudorandomUint(id.xy) % FramesToRender;
     
     if (chunk > ChunkToRender)
@@ -262,6 +262,7 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     
     float4 color = float4(0, 0, 0, 0);
     
+    // Same logic as 2D fractals
     for (int i = 0; i < AntialiasingSamples; i++)
     {
         float2 idf = id.xy + float2(realW, realH) * (Scale / 2 - 0.5);

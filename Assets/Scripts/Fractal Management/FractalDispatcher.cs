@@ -51,8 +51,11 @@ namespace Fractals
             }
         }
 
+        // [0, framesToRender)
+        // Denotes the pixels of the image that will be rendered
         int _chunkToRender;
 
+        // Allows to render an image in multiple frames to save performance
         int _framesToRender;
 
         public int FramesToRender

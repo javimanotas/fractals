@@ -5,7 +5,7 @@ namespace Fractals
     /// <summary> Fractals that are saved automatically the first time the application starts </summary>
     public static class DefaultSavedFractals
     {
-        static List<(string, List<string>)> fractals = new()
+        readonly static List<(string, List<string>)> _fractals = new()
         {
             ("Spiral", new()
             {
@@ -62,7 +62,7 @@ namespace Fractals
 
         public static void Save(FractalSaver saver)
         {
-            foreach (var (name, lines) in fractals)
+            foreach (var (name, lines) in _fractals)
             {
                 saver.Save(name, lines);
             }
