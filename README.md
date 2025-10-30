@@ -1,8 +1,8 @@
 # Fractals
 
 A **2D and 3D real-time fractal rendering program** developed with Unity.
-> [!NOTE]
-> Screenshots are saved into [Application.dataPath](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Application-dataPath.html).
+
+Screenshots are saved into [Application.dataPath](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Application-dataPath.html).
 
 > [!NOTE]  
 > Unfortunately, not all platforms or hardware supports double precision on decimal values in compute shaders. If this is the case, you will see a black screen.
