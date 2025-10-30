@@ -4,8 +4,11 @@ A **2D and 3D real-time fractal rendering program** developed with Unity.
 > [!NOTE]
 > Screenshots are saved into [Application.dataPath](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Application-dataPath.html).
 
+> [!NOTE]  
+> Unfortunately, not all platforms or hardware supports double precision on decimal values in compute shaders. If this is the case, you will see a black screen.
+
 > [!WARNING]  
-> Even though the program is optimized, enabling high-quality settings can result in very expensive GPU calls, which might cause the program to crash. Please read this document carefully before using the program.
+> Even though the program is optimized, enabling high-quality settings can result in very expensive GPU calls, which might cause the program to crash. Please read this document carefully before using the program and try rendering in multiple frames if you are not sure.
 
 ---
 
@@ -34,8 +37,6 @@ $$ f_0 = z $$
 $$ f_{n+1} = p(f_n) + c $$
 
 - `c` is a constant value applied uniformly across all points.
-> [!NOTE]  
-> Unfortunately, only the Windows platform supports double precision on decimal values in compute shaders. This limitation prevents other platforms from zooming as deeply into the fractals.
 ---
 
 ### Navigation and Interaction
@@ -93,3 +94,4 @@ The 3D fractals are rendered using a technique called [ray marching](https://iqu
 - Use WASD to move the camera forward/backward and to the right/left.
 - Use QE to move the camera up/down.
 - Use arrow keys to rotate the camera.
+- Use the **mouse wheel** to zoom in and out.

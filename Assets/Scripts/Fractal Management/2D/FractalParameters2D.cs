@@ -71,19 +71,6 @@ namespace Fractals
             }
         }
 
-        int _antialiasingSamples;
-
-        public int AntialiasingSamples
-        {
-            get => _antialiasingSamples;
-            set
-            {
-                AreChangesOnParameters = true;
-                _antialiasingSamples = value;
-                ComputeShader.SetInt("AntialiasingSamples", value);
-            }
-        }
-
         public int NumCoeficients => _coeficients.Length;
 
         readonly float[] _coeficients = new float[10];

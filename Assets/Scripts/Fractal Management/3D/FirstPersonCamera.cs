@@ -6,6 +6,8 @@ namespace Fractals
     [RequireComponent(typeof(Camera))]
     public class FirstPersonCamera : MonoBehaviour
     {
+        [SerializeField] FractalDispatcher3D Dispatcher;
+
         const float _SPEED = 3.75f;
 
         const float _ROT_SPEED = 70;
@@ -34,9 +36,9 @@ namespace Fractals
 
             if (input != Vector3.zero || rot != Vector3.zero)
             {
-                transform.position += input * (_SPEED * Time.deltaTime);
+                transform.position += input * (_SPEED * Time.deltaTime / Dispatcher.Scale);
                 transform.position = transform.position.WithMagnitudeClamped(2.1f, 5.5f);
-                transform.eulerAngles += rot * (_ROT_SPEED * Time.deltaTime);
+                transform.eulerAngles += rot * (_ROT_SPEED * Time.deltaTime / Dispatcher.Scale);
             }
         }
     }

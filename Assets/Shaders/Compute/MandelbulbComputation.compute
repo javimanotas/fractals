@@ -6,17 +6,20 @@ to make it cleaner */
 
 #define EPSILON 0.001
 #define PIXEL_DETAIL 5
-
 RWTexture2D<float4> FractalTex;
 bool Background;
 float3 CamPos;
 float3 Forward;
 float3 LightDir;
 float Time;
-
 bool Julia;
 float JuliaRe;
 float JuliaIm;
+
+float Scale;
+int AntialiasingSamples;
+int ChunkToRender;
+int FramesToRender;
 
 float3 BgColor;
 float3 HaloColor;
@@ -34,6 +37,19 @@ float Contrast;
 float Saturation;
 float OuterVignette;
 float InnerVignette;
+
+float PseudorandomFloat(float2 seed)
+{
+    return frac(sin(dot(seed, float2(12.9898, 78.233))) * 43758.5453);
+}
+
+uint PseudorandomUint(uint2 seed)
+{
+    uint hash = seed.x * 374761393u + seed.y * 668265263u;
+    hash = (hash ^ (hash >> 13u)) * 1274126177u;
+    hash = hash ^ (hash >> 16u);
+    return hash;
+}
 
 /* returns a tuple consisting on the distance of the given point to the center
 of coordinates and aditional data of the calculations to improve coloring */
@@ -103,7 +119,7 @@ float2 mandelbulbInfo(float3 z0)
         zn = r * float3(cos(theta) * cos(phi), sin(theta) * cos(phi), sin(phi)) + float3(JuliaRe, 0, JuliaIm);
         minR = min(minR, r);
     }
-
+    
     return float2(r * log(r) / dr / 2, minR);
 }
 
@@ -219,57 +235,90 @@ float3 vignette(float3 col, float outerStrength, float innerStrength, float2 scr
 [numthreads(8, 8, 1)]
 void CSMain(uint3 id : SV_DispatchThreadID)
 {
+    float realW, realH;
     float width;
     float height;
     FractalTex.GetDimensions(width, height);
+    realW = width;
+    realH = height;
+
+    width *= Scale;
+    height *= Scale;
+
+    int chunk = PseudorandomUint(id.xy) % FramesToRender;
+    
+    if (chunk > ChunkToRender)
+    {
+        return;
+    }
+    
+    if (chunk < ChunkToRender)
+    {
+        FractalTex[id.xy] = float4(0, 0, 0, Background ? 1 : 0);
+        return;
+    }
+
     bool horizontalDisplay = width > height;
     
-    float2 screenUV = id.xy / float2(width, height);
-    float2 uv = 2 * screenUV - 1;
+    float4 color = float4(0, 0, 0, 0);
     
-    if (horizontalDisplay)
+    for (int i = 0; i < AntialiasingSamples; i++)
     {
-        uv.x *= width / height;
-    }
-    else
-    {
-        uv.y *= height / width;
-    }
-    
-    float3 right = normalize(cross(float3(0, 1, 0), Forward));
-    float3 up = normalize(cross(Forward, right));
-    float3 rayDir = normalize(uv.x * right + uv.y * up + 3 * Forward);
-    
-    float3 bg = exp((horizontalDisplay ? uv : screenUV).y - 2) * BgColor;
-    float3 col = bg + HaloColor * pow(abs(dot(Forward, rayDir)), Halo);
-
-    float2 info = intersectionInfo(CamPos, rayDir, 1 / (width.x * PIXEL_DETAIL));
-    
-    if (info.x > 0)
-    {
-        float3 hitPoint = CamPos + info.x * rayDir;
-        float3 normal = normalAt(hitPoint);
-        float shadow = softShadow(hitPoint, LightDir);
-
-        float incidence = 4.5 * max(0, dot(normal, LightDir));
-        float bac = 0.8 * max(0, dot(-float3(LightDir.x, 1, LightDir.z), normal));
-        float spe = 3 * pow(max(0, dot(LightDir, reflect(rayDir, normal))), 10);
-
-        info.y = pow(abs(info.y), ColorVariation);
-
-        float3 lin = Tint * incidence * shadow + bac + spe * shadow * Tint;
-        float3 tc0 = 0.5 + 0.5 * sin(HueOffset + HueRange * info.y + BulbColor);
+        float2 idf = id.xy + float2(realW, realH) * (Scale / 2 - 0.5);
+        idf += float2(
+            PseudorandomFloat(float2(width + i, height + i)) - 0.5,
+            PseudorandomFloat(float2(height + 2 * i, width - 2 * i)) - 0.5
+        );
         
-        col = lin * Tint * 0.3 * tc0;
-
-        col = lerp(col, bg, 1 - exp(-BgBlending * info.x * info.x));
-    }
-
-    col = clamp(col, 0, 1);
-    col = darkCorrection(col, DarkCorrection);
-    col = contrast(col, Contrast);
-    col = saturation(col, Saturation);
-    col = vignette(col, OuterVignette, InnerVignette, screenUV);
+        float2 screenUV = idf / float2(width, height);
+        float2 uv = 2 * screenUV - 1;
+        
+        if (horizontalDisplay)
+        {
+            uv.x *= width / height;
+        }
+        else
+        {
+            uv.y *= height / width;
+        }
     
-    FractalTex[id.xy] = float4(col.xyz, Background || info.x > 0 ? 1 : 0);
+        float3 right = normalize(cross(float3(0, 1, 0), Forward));
+        float3 up = normalize(cross(Forward, right));
+        float3 rayDir = normalize(uv.x * right + uv.y * up + 3 * Forward);
+    
+        float3 bg = exp((horizontalDisplay ? uv : screenUV).y - 2) * BgColor;
+        float3 col = bg + HaloColor * pow(abs(dot(Forward, rayDir)), Halo);
+
+        float2 info = intersectionInfo(CamPos, rayDir, 1 / (width.x * PIXEL_DETAIL));
+    
+        if (info.x > 0)
+        {
+            float3 hitPoint = CamPos + info.x * rayDir;
+            float3 normal = normalAt(hitPoint);
+            float shadow = softShadow(hitPoint, LightDir);
+
+            float incidence = 4.5 * max(0, dot(normal, LightDir));
+            float bac = 0.8 * max(0, dot(-float3(LightDir.x, 1, LightDir.z), normal));
+            float spe = 3 * pow(max(0, dot(LightDir, reflect(rayDir, normal))), 10);
+
+            info.y = pow(abs(info.y), ColorVariation);
+
+            float3 lin = Tint * incidence * shadow + bac + spe * shadow * Tint;
+            float3 tc0 = 0.5 + 0.5 * sin(HueOffset + HueRange * info.y + BulbColor);
+        
+            col = lin * Tint * 0.3 * tc0;
+
+            col = lerp(col, bg, 1 - exp(-BgBlending * info.x * info.x));
+        }
+
+        col = clamp(col, 0, 1);
+        col = darkCorrection(col, DarkCorrection);
+        col = contrast(col, Contrast);
+        col = saturation(col, Saturation);
+        col = vignette(col, OuterVignette, InnerVignette, screenUV);
+        
+        color += float4(col, Background || info.x > 0 ? 1 : 0);
+    }
+    
+    FractalTex[id.xy] = float4(color / AntialiasingSamples);
 }

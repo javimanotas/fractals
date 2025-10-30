@@ -23,12 +23,22 @@ float4 Coeficients[MAX_DEGREE];
 
 int MaxIter;
 int AntialiasingSamples;
+int ChunkToRender;
+int FramesToRender;
 
 int PaletteIndex;
 
 float PseudorandomFloat(float2 seed)
 {
     return frac(sin(dot(seed, float2(12.9898, 78.233))) * 43758.5453);
+}
+
+uint PseudorandomUint(uint2 seed)
+{
+    uint hash = seed.x * 374761393u + seed.y * 668265263u;
+    hash = (hash ^ (hash >> 13u)) * 1274126177u;
+    hash = hash ^ (hash >> 16u);
+    return hash;
 }
 
 // credits to: https://www.shadertoy.com/view/ll2GD3
@@ -83,6 +93,19 @@ void CSMain(uint3 id : SV_DispatchThreadID)
     uint width;
     uint height;
     FractalTex.GetDimensions(width, height);
+    
+    int chunk = PseudorandomUint(id.xy) % FramesToRender;
+    
+    if (chunk > ChunkToRender)
+    {
+        return;
+    }
+    
+    if (chunk < ChunkToRender)
+    {
+        FractalTex[id.xy] = float4(0, 0, 0, 1);
+        return;
+    }
     
     FractalTransform transform = TransformBuffer[0];
     

@@ -31,6 +31,21 @@ namespace Fractals
 
         [SerializeField] Light MainLight;
 
+        const float _SCALE_SPEED = 1.05f;
+
+        float _scale = 1.0f;
+
+        public float Scale
+        {
+            get => _scale;
+            set
+            {
+                _scale = value;
+                AreChangesOnParameters = true;
+                ComputeShader.SetFloat("Scale", _scale);
+            }
+        }
+
         float _time;
 
         public float Time
@@ -66,6 +81,8 @@ namespace Fractals
             {
                 ComputeShader.SetFloat(key, value);
             }
+
+            Scale = 1.0f;
         }
 
         protected override void Update()
@@ -77,7 +94,15 @@ namespace Fractals
                 ComputeShader.SetVector("Forward", _camTransform.Value.Item2);
                 AreChangesOnParameters = true;
             }
-            
+
+            var scroll = Input.mouseScrollDelta.y;
+
+            if (scroll != 0)
+            {
+                Scale *= Mathf.Pow(_SCALE_SPEED, scroll);
+                Scale = Mathf.Max(Scale, 1.0f);
+            }
+
             base.Update();
         }
     }

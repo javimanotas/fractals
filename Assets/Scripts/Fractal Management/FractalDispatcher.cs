@@ -22,7 +22,7 @@ namespace Fractals
                 var texture = new Texture2D(_renderTex.width, _renderTex.height, TextureFormat.ARGB32, false);
                 texture.ReadPixels(new Rect(0, 0, _renderTex.width, _renderTex.height), 0, 0);
                 texture.Apply();
-
+                Debug.Log("finished");
                 return texture.EncodeToPNG();
             }
         }
@@ -48,6 +48,35 @@ namespace Fractals
                     _resolution = value;
                     OnResolutionChanged();
                 }
+            }
+        }
+
+        int _chunkToRender;
+
+        int _framesToRender;
+
+        public int FramesToRender
+        {
+            private get => _framesToRender;
+            set
+            {
+                _chunkToRender = value - 1;
+                _framesToRender = value;
+                AreChangesOnParameters = true;
+                ComputeShader.SetInt("FramesToRender", _framesToRender);
+            }
+        }
+
+        int _antialiasingSamples;
+
+        public int AntialiasingSamples
+        {
+            get => _antialiasingSamples;
+            set
+            {
+                AreChangesOnParameters = true;
+                _antialiasingSamples = value;
+                ComputeShader.SetInt("AntialiasingSamples", value);
             }
         }
 
@@ -113,7 +142,8 @@ namespace Fractals
         void OnResolutionChanged()
         {
             CreateRenderTexture();
-            DispatchShader();
+            AreChangesOnParameters = true;
+            Update();
         }
 
         void CreateRenderTexture()
@@ -140,11 +170,25 @@ namespace Fractals
 
         protected virtual void Update()
         {
-
+            if (AreChangesOnParameters)
+            {
+                _chunkToRender = FramesToRender - 1;
+            }
+            if (_chunkToRender >= 0)
+            {
+                ComputeShader.SetInt("ChunkToRender", _chunkToRender);
+                AreChangesOnParameters = true;
+            }
+            
             if (AreChangesOnParameters)
             {
                 AreChangesOnParameters = false;
                 DispatchShader();
+            }
+
+            if (_chunkToRender >= 0)
+            {
+                _chunkToRender--;
             }
         }
 
