@@ -4,11 +4,8 @@ A **2D and 3D real-time fractal rendering program** developed with Unity.
 
 Screenshots are saved into [Application.dataPath](https://docs.unity3d.com/6000.0/Documentation/ScriptReference/Application-dataPath.html).
 
-> [!NOTE]  
-> Unfortunately, not all platforms or hardware supports double precision on decimal values in compute shaders. If this is the case, you will see a black screen.
-
 > [!WARNING]  
-> Even though the program is optimized, enabling high-quality settings can result in very expensive GPU calls, which might cause the program to crash. Please read this document carefully before using the program and try rendering in multiple frames if you are not sure.
+> Even though the program is optimized, enabling high-quality settings can result in very expensive GPU calls, which might cause the program to crash. Please read this document carefully before using the program and try rendering in multiple frames if you are not sure about the computational impact of certain parameters.
 
 ---
 
@@ -43,26 +40,15 @@ $$ f_{n+1} = p(f_n) + c $$
 
 - Use the **left mouse button** to move around the fractal.
 - Use the **mouse wheel** to zoom in and out.
+- Use the **right mouse button** by dragging to zoom in a rectangular region.
 - Alternatively, you can use the **UI input fields** to navigate.
 - The complex plane can be **inverted** (raising all points to the power of `-1`).
 
-> [!TIP]  
-> You can zoom into a specific area by creating a rectangle with the **right mouse button pressed** over the region.
-
 ---
 
-### Rendering Options
+### Rendering
 
-- The program computes how many iterations are required for a point to diverge to infinity. You can adjust the **maximum number of iterations** to control the rendering.
-> [!WARNING] 
-> Higher iteration limits can be computationally expensive, especially if many black points (points belonging to the fractal set) are visible on the screen.
-
-- You can enable **antialiasing** to smooth the fractal edges by specifying the number of samples per pixel.
-> [!CAUTION]  
-> The rendering time increases linearly with the number of antialiasing samples. For example, 4 samples per pixel will quadruple the rendering time. Adjust this setting **CAREFULLY**.
-
-> [!NOTE]  
-> If you are unsure about other setting's impact, leave the rendering options with their default value to ensure program stability.
+Unfortunately, not all platforms or hardware support double precision on decimal values in compute shaders. Platforms different from Windows will use floating 32 bit floatint point. Windows will use instead 64 bits so if your architecture doesn't support it you will see a black screen.
 
 ---
 
